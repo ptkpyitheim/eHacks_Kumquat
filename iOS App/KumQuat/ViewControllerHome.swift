@@ -1,0 +1,187 @@
+//
+//  ViewControllerHome.swift
+//  KumQuat
+//
+
+import Foundation
+
+import UIKit
+import SQLite3
+
+class ViewControllerHome: UIViewController, UITableViewDataSource, UITableViewDelegate {
+    let dbHandler: DBHandler = DBHandler()
+    var posts: [Post] = [] {
+        didSet {
+            feedTableView.reloadData()
+        }
+    }
+    
+    var userId: Int!
+    var username: String!
+    var userEmail: String!
+    var userDorm: String!
+    var userCollege: String!
+    
+
+    @IBOutlet weak var feedTableView: UITableView!
+    @IBOutlet weak var channelSwitch: UISegmentedControl!
+    @IBOutlet weak var postBtn: UIButton!
+    @IBOutlet weak var postMessage: UITextField!
+    
+    @IBAction func goToSettings(_ sender: UIButton) {
+        let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
+        let settingsVC = storyBoard.instantiateViewController(withIdentifier: "SettingsViewController") as! SettingsViewController
+        self.navigationController?.pushViewController(settingsVC, animated: true)
+//        performSegue(withIdentifier: "feedToSettings", sender: self)
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        updateUserData()
+        
+        self.view.backgroundColor = UIColor(patternImage: UIImage(named: "background.jpg")!)
+
+        let postCell = UINib(nibName: "PostCellTableViewCell", bundle: nil)
+        feedTableView.register(postCell, forCellReuseIdentifier: "postCell")
+        feedTableView.dataSource = self
+        feedTableView.rowHeight = 100
+        feedTableView.delegate = self
+        feedTableView.backgroundColor = UIColor.clear
+        if channelSwitch.selectedSegmentIndex == 0 {
+            posts = dbHandler.getAllCollegePosts(college: userCollege)
+        } else {
+            posts = dbHandler.getAllDormPosts(dorm: userDorm)
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        updateUserData()
+        
+        if channelSwitch.selectedSegmentIndex == 0 {
+            posts = dbHandler.getAllCollegePosts(college: userCollege)
+        } else {
+            posts = dbHandler.getAllDormPosts(dorm: userDorm)
+        }
+
+        feedTableView.reloadData()
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+
+    
+    func updateUserData(){
+        userId = UserDefaults().integer(forKey: "id")
+        username = UserDefaults().string(forKey: "username")
+        userEmail = UserDefaults().string(forKey: "email")
+        userDorm = UserDefaults().string(forKey: "dorm")
+        userCollege = UserDefaults().string(forKey: "school")
+        
+        
+        
+    }
+    
+    func tableView(_ tableView:UITableView, didSelectRowAt indexPath: IndexPath) {
+        let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
+        let replyVC = storyBoard.instantiateViewController(withIdentifier: "ReplyVC") as! PostReplyViewController
+        replyVC.parentPost = posts[indexPath.row]
+        self.navigationController?.pushViewController(replyVC, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return posts.count
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete{
+           
+            
+            print(indexPath)
+            print("row", indexPath.row)
+            print(posts[indexPath.row].id)
+            var post_id = posts[indexPath.row].id
+            posts.remove(at: indexPath.row)
+            dbHandler.deletePost(postId: post_id)
+//            if !databaseHandler.deletePost(postId: 30){
+//                print("error delete")
+//            }
+            
+        }
+        
+    }
+    
+    
+
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = feedTableView.dequeueReusableCell(withIdentifier: "postCell", for: indexPath) as! PostCellTableViewCell
+        
+        let post_id = posts[indexPath.row].id
+        let content = posts[indexPath.row].content
+        let author = posts[indexPath.row].author
+        let anonymous = posts[indexPath.row].isAnon
+        let score = dbHandler.getPostScore(postId: posts[indexPath.row].id)
+        let num_replies = dbHandler.getReplies(postId: post_id).count
+        let timestamp = posts[indexPath.row].timestamp
+        cell.configureCell(id: post_id, author: author!, content: content!, score: score, anonymous: anonymous, num_replies: num_replies, timestamp: timestamp)
+        cell.setDatabaseHandler(handler: dbHandler)
+        cell.setViewController(vc: self)
+        
+        return cell
+
+    }
+    
+    
+    
+    @IBAction func switchView(_ sender: UISegmentedControl) {
+        let channel = channelSwitch.selectedSegmentIndex
+        if (channel == 0) {
+            posts = dbHandler.getAllCollegePosts(college: userCollege)
+        }
+        else if (channel == 1) {
+            posts = dbHandler.getAllDormPosts(dorm: userDorm)
+        }
+        
+        feedTableView.reloadData()
+    }
+    
+    
+    @IBAction func submitPost(_ sender: Any) {
+        if postMessage.text!.count > 3 {
+            performSegue(withIdentifier: "anonChoiceSegue", sender: self)
+        }
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let vc = segue.destination as? PostChoice{
+            let message = postMessage.text!
+            let userId = UserDefaults.standard.object(forKey: "id") as? Int ?? -1
+            
+            var postDorm = "n/a"
+            var postCollege = "n/a"
+            
+            if channelSwitch.selectedSegmentIndex == 0 {
+                postCollege = UserDefaults.standard.object(forKey: "school") as? String ?? "n/a"
+            } else {
+                postDorm = UserDefaults.standard.object(forKey: "dorm") as? String ?? "n/a"
+            }
+            
+            vc.table = feedTableView
+            vc.dbHandler = dbHandler
+            vc.message = message
+            vc.authorId = userId
+            vc.dorm = postDorm
+            vc.college = postCollege
+            return
+        } else {
+            return
+        }
+        
+    }
+    
+    
+}
