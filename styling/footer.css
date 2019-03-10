@@ -1,0 +1,46 @@
+
+#footer {
+    background-color: #c8c8c8;
+}
+
+#created-by, li {
+    margin-bottom: 0px;
+    list-style: none;
+}
+
+a:link {
+    text-decoration: none;
+}
+
+.link-footer:hover {
+    color: #e08d3c;
+}
+
+a {
+    color: black;
+}
+
+#created-by li {
+    font-size: 0.8em;
+    padding: 2px;
+    display: inline;
+}
+
+#by {
+    font-size: 0.9em;
+    margin-bottom: 0px;
+}
+
+.kumquat-img {
+    width: 20px;
+    height: 20px;
+}
+
+.footer-subheading {
+    font-size: 1.1em;
+    color: #e08d3c;
+}
+
+#ptk-name {
+    /* margin-left: 3px; */
+}

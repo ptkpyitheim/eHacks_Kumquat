@@ -1,2 +1,1 @@
-# eHacks_Kumquat
-eHacks (Hackathon)
+# e-hacks-2019-washu

@@ -1,0 +1,32 @@
+body {
+    font-family: 'Quicksand', sans-serif;
+    background-color: #eee;
+}
+
+#nav {
+    background-color: #e08d3c;
+}
+
+h1 {
+    font-size: 200px;
+}
+
+.nav-link {
+    padding: 0;
+}
+
+.nav-link:hover {
+    border-bottom: 2px solid black;
+}
+
+#download {
+    background-color: yellow;
+    border: 1px solid yellow;
+    border-radius: 0.4em;
+}
+
+.kumquat-header {
+    width: 40px;
+    height: 40px;
+}
+

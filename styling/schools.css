@@ -1,0 +1,45 @@
+
+.placeholder {
+    height: 80px;
+}
+
+.sch-img {
+    margin: 1.66%;
+    width: 95%;
+    height: 50%;
+}
+
+.schools{
+    width: 100%;
+}
+
+.images {
+    position: relative;
+    width: 50%;
+    height: 100%;
+}
+
+.text-in-img {
+    border-radius: 2px;
+    padding: 3px;
+    padding-left: 20px;
+    width: 90%;
+    background-color: rgb(0,0,0,0.3);
+    color: white;
+    font-size: 1.5vmax;
+    position: absolute;
+    bottom: 1%;
+    left: 50%;
+    transform: translate(-50%, -50%);    
+}
+
+.text-in-img:hover {
+    cursor: pointer;
+    background-color: rgb(255,255, 255, 0.4);
+    color: black;
+}
+
+#schools-header {
+    border-bottom: 2px solid grey;
+}
+
